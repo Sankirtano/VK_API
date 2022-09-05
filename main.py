@@ -42,7 +42,7 @@ def download_photo_like(url, name):
 
 
 def main():
-    r = requests.get('https://api.vk.com/method/photos.getAlbums', params={'owner_id': vb_id,
+    r = requests.get('https://api.vk.com/method/photos.getAlbums', params={'owner_id': user_id,
                                                                            'access_token': token, 'v': 5.131})
     write_albums(r.json())
     albums = json.load(open('albums.json'))
@@ -56,7 +56,7 @@ def main():
         isExist = os.path.exists(path)
         if not isExist:
             os.makedirs(path)
-        r = requests.get('https://api.vk.com/method/photos.get', params={'owner_id': vb_id, 'album_id': thing['id'],
+        r = requests.get('https://api.vk.com/method/photos.get', params={'owner_id': user_id, 'album_id': thing['id'],
                                                                          'photo_sizes': 1, 'extended': True,
                                                                          'rev': 0, 'count': 1000,
                                                                          'access_token': token, 'v': 5.131})
