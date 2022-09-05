@@ -13,16 +13,24 @@ def write_albums(data):
         json.dump(data, file, indent=2, ensure_ascii=False)
 
 
-def write_photos(data, name):
+def write_photos(data):
     with open('photos.json', 'w') as file:
         json.dump(data, file, indent=2, ensure_ascii=False)
 
 
-def get_largest(size_dict):
-    if size_dict['width'] >= size_dict['height']:
-        return size_dict['width']
-    else:
-        return size_dict['height']
+def get_largest(size_list):
+    for dct in size_list:
+        if dct['type'] == 'w':
+            return dct['url']
+    for dct in size_list:
+        if dct['type'] == 'z':
+            return dct['url']
+    for dct in size_list:
+        if dct['type'] == 'y':
+            return dct['url']
+    for dct in size_list:
+        if dct['type'] == 'x':
+            return dct['url']
 
 
 def download_photo(url, name):
@@ -42,7 +50,7 @@ def download_photo_like(url, name):
 
 
 def main():
-    r = requests.get('https://api.vk.com/method/photos.getAlbums', params={'owner_id': user_id,
+    r = requests.get('https://api.vk.com/method/photos.getAlbums', params={'owner_id': user_id, 'need_system': 0,
                                                                            'access_token': token, 'v': 5.131})
     write_albums(r.json())
     albums = json.load(open('albums.json'))
@@ -53,20 +61,20 @@ def main():
     for thing in albums['response']['items']:
         path = thing['title']
         root_path = os.getcwd()
-        isExist = os.path.exists(path)
-        if not isExist:
+        is_exist = os.path.exists(path)
+        if not is_exist:
             os.makedirs(path)
         r = requests.get('https://api.vk.com/method/photos.get', params={'owner_id': user_id, 'album_id': thing['id'],
                                                                          'photo_sizes': 1, 'extended': True,
-                                                                         'rev': 0, 'count': 1000,
+                                                                         'count': 1000,
                                                                          'access_token': token, 'v': 5.131})
-        write_photos(r.json(), path)
+        write_photos(r.json())
         photos = json.load(open('photos.json'))
         os.chdir(path)
         max_like, url = 0, ''
         for photo in photos['response']['items']:
             sizes = photo['sizes']
-            max_size_url = max(sizes, key=get_largest)['url']
+            max_size_url = get_largest(sizes)
             download_photo(max_size_url, photo['id'])
             like = int(photo['likes']['count'])
             if like >= max_like:
